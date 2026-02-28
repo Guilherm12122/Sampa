@@ -3,6 +3,20 @@ class NumberNode:
         self.value = value
     def eval(self, ctx):
         return self.value
+    
+class PlusNode:
+    def __init__(self, left, right):
+        self.left = left
+        self.right = right
+    def eval(self, ctx):
+        return self.left.eval(ctx) + self.right.eval(ctx)
+    
+class MultiplicativeNode:
+    def __init__(self, left, right):
+        self.left = left
+        self.right = right
+    def eval(self, ctx):
+        return self.left.eval(ctx) * self.right.eval(ctx)
 
 class Parser:
     def __init__(self, tokens):
@@ -28,21 +42,37 @@ class Parser:
     def get_token_value(self):
         return self.token_at()[1] if self.token_at() else None
     
+
     def parse_add_expr(self):
         
-        left = NumberNode(self.shift_token()[1])
+        left = self.parse_multi_expr()
 
-        while (self.get_token_value() == '+') | (self.get_token_value() == '-'):
-            operator = self.shift_token()[1]
-            right = NumberNode(self.shift_token()[1])
-            left = {
-                'type': "BinaryExpression",
-                'left': left,
-                'right': right,
-                'operator': operator
-            }
+        while (self.get_token_value() in ['+', '-']):
+
+            self.shift_token()
+
+            right = self.parse_multi_expr()
+
+            left = PlusNode(left, right)
 
         return left
+    
+
+    def parse_multi_expr(self):
+
+        left = NumberNode(self.shift_token()[1])
+
+        while (self.get_token_value() in ['*', '%', '/']):
+
+            self.shift_token()
+
+            right = NumberNode(self.shift_token()[1])
+
+            left = MultiplicativeNode(left, right)
+
+        return left
+
+
 
     def parse_statement(self):
 
@@ -66,8 +96,3 @@ class Parser:
             self.stmt_indx += 1
 
         return ast
-
-
-
-
-

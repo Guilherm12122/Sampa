@@ -17,6 +17,13 @@ class MultiplicativeNode:
         self.right = right
     def eval(self, ctx):
         return self.left.eval(ctx) * self.right.eval(ctx)
+    
+class PrintNode:
+    def __init__(self, expr):
+        self.expr = expr
+    def eval(self, ctx):
+        print(self.expr.eval(ctx))
+
 
 class Parser:
     def __init__(self, tokens):
@@ -71,7 +78,19 @@ class Parser:
             left = MultiplicativeNode(left, right)
 
         return left
+    
 
+    def parse_print_expr(self):
+
+        self.validate_print()
+
+        while self.get_token_value() != ")":
+            
+            expr = self.parse_statement()
+
+        self.shift_token()
+
+        return PrintNode(expr)
 
 
     def parse_statement(self):
@@ -81,7 +100,8 @@ class Parser:
         match token_type:
             case 'NUMBER':
                 return self.parse_add_expr()
-
+            case 'PRINT':
+                return self.parse_print_expr()
 
     def parse_program(self):
 
@@ -96,3 +116,13 @@ class Parser:
             self.stmt_indx += 1
 
         return ast
+    
+
+    def validate_print(self):
+
+        self.token_indx += 1
+
+        if self.get_token_value() != "(":
+            raise Exception("Nao foi identificado paranteses em seu PRINT !")
+        
+        self.shift_token()

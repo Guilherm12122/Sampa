@@ -11,12 +11,33 @@ class PlusNode:
     def eval(self, ctx):
         return self.left.eval(ctx) + self.right.eval(ctx)
     
+class MinusNode:
+    def __init__(self, left, right):
+        self.left = left
+        self.right = right
+    def eval(self, ctx):
+        return self.left.eval(ctx) - self.right.eval(ctx)
+    
 class MultiplicativeNode:
     def __init__(self, left, right):
         self.left = left
         self.right = right
     def eval(self, ctx):
         return self.left.eval(ctx) * self.right.eval(ctx)
+    
+class ModulusNode:
+    def __init__(self, left, right):
+        self.left = left
+        self.right = right
+    def eval(self, ctx):
+        return self.left.eval(ctx) % self.right.eval(ctx)
+    
+class DivisionNode:
+    def __init__(self, left, right):
+        self.left = left
+        self.right = right
+    def eval(self, ctx):
+        return self.left.eval(ctx) / self.right.eval(ctx)
     
 class PrintNode:
     def __init__(self, expr):
@@ -50,34 +71,65 @@ class Parser:
         return self.token_at()[1] if self.token_at() else None
     
 
-    def parse_add_expr(self):
+
+    def check_operation(self, operator, left, right):
         
+        match operator[1]:
+            case '+':
+                return PlusNode(left, right)
+            case '-':
+                return MinusNode(left, right)
+            case '*':
+                return MultiplicativeNode(left, right)
+            case '%':
+                return ModulusNode(left, right)
+            case '/':
+                return DivisionNode(left, right)
+            
+
+    def parse_add_expr(self):
+
         left = self.parse_multi_expr()
 
         while (self.get_token_value() in ['+', '-']):
 
-            self.shift_token()
+            operator = self.shift_token()
 
             right = self.parse_multi_expr()
 
-            left = PlusNode(left, right)
+            left = self.check_operation(operator, left, right)
 
         return left
     
 
     def parse_multi_expr(self):
-
+        
         left = NumberNode(self.shift_token()[1])
 
         while (self.get_token_value() in ['*', '%', '/']):
 
-            self.shift_token()
+            operator = self.shift_token()
 
             right = NumberNode(self.shift_token()[1])
 
-            left = MultiplicativeNode(left, right)
+            left = self.check_operation(operator, left, right)
 
         return left
+
+
+    # def parse_multi_expr(self):
+
+    #     left = NumberNode(self.shift_token()[1])
+
+    #     while (self.get_token_value() in ['*', '%', '/']):
+
+    #         self.shift_token()
+
+    #         right = NumberNode(self.shift_token()[1])
+
+    #         left = MultiplicativeNode(left, right)
+
+    #     return left
     
 
     def parse_print_expr(self):
@@ -126,3 +178,4 @@ class Parser:
             raise Exception("Nao foi identificado paranteses em seu PRINT !")
         
         self.shift_token()
+

@@ -53,6 +53,14 @@ def tokenize(code_str: str):
                 tuples_stmt.append(("MULTIPLICATION", "*"))
                 j += 1
 
+            elif stmt[j:j+2] == '==':
+                tuples_stmt.append(("EQUALS", "=="))
+                j += 2
+
+            elif stmt[j:j+2] == '!=':
+                tuples_stmt.append(("NOT_EQUALS", "!="))
+                j += 2
+
             elif stmt[j:j+7] == "MOSTRAR":
                 tuples_stmt.append(("PRINT", "MOSTRAR"))
                 j += 7
@@ -65,5 +73,3 @@ def tokenize(code_str: str):
         i += 1
 
     return tokens
-
-

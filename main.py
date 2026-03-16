@@ -10,20 +10,32 @@ from parsers.parser import Parser
 
 # code_test_7 = "10 / 9"
 # code_test_8 = "10 % 9"
-code_test_9 = "10 / 9 * 8"
+# code_test_9 = "10 / 9 * 8"
 
-tokens = tokenize(code_test_9)
-tokens = tokenize(code_test_9)
+
+# code_test_10 = "10 / 9 * 8 == 10"
+# code_test_11 = "10 == 10"
+# code_test_12 = "10 % 8 != 10"
+# code_test_13 = "MOSTRAR(1+2*3) == MOSTRAR(1+5*3)"
+
+code_test_14 = "(8 * 10)"
+code_test_15 = "(8 * 10) + 1"
+code_test_16 = "()"
+code_test_17 = "(())"
+
+k = ()
+tokens = tokenize(code_test_17)
 
 print(tokens)
 
 parser = Parser(tokens)
 ast = parser.parse_program()
 ast_expr = ast[0]
-ast_expr_right = ast_expr.right
-ast_expr_left = ast_expr.left
+# ast_expr_right = ast_expr.right
+# ast_expr_left = ast_expr.left
 
 # print(ast)
 print(ast_expr)
-print(ast_expr_right)
-print(ast_expr_left)
+print(ast_expr.expr)
+# print(ast_expr_right)
+# print(ast_expr_left)

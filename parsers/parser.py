@@ -11,6 +11,13 @@ class PlusNode:
     def eval(self, ctx):
         return self.left.eval(ctx) + self.right.eval(ctx)
     
+class MinusNode:
+    def __init__(self, left, right):
+        self.left = left
+        self.right = right
+    def eval(self, ctx):
+        return self.left.eval(ctx) - self.right.eval(ctx)
+    
 class MultiplicativeNode:
     def __init__(self, left, right):
         self.left = left
@@ -18,11 +25,45 @@ class MultiplicativeNode:
     def eval(self, ctx):
         return self.left.eval(ctx) * self.right.eval(ctx)
     
+class ModulusNode:
+    def __init__(self, left, right):
+        self.left = left
+        self.right = right
+    def eval(self, ctx):
+        return self.left.eval(ctx) % self.right.eval(ctx)
+    
+class EqualsNode:
+    def __init__(self, left, right):
+        self.left = left
+        self.right = right
+    def eval(self, ctx):
+        return self.left.eval(ctx) == self.right.eval(ctx)
+    
+class NotEqualsNode:
+    def __init__(self, left, right):
+        self.left = left
+        self.right = right
+    def eval(self, ctx):
+        return self.left.eval(ctx) != self.right.eval(ctx)
+    
+class DivisionNode:
+    def __init__(self, left, right):
+        self.left = left
+        self.right = right
+    def eval(self, ctx):
+        return self.left.eval(ctx) / self.right.eval(ctx)
+    
 class PrintNode:
     def __init__(self, expr):
         self.expr = expr
     def eval(self, ctx):
         print(self.expr.eval(ctx))
+
+class ParenNode:
+    def __init__(self, expr):
+        self.expr = expr
+    def eval(self, ctx):
+        return self.expr.eval(ctx)
 
 
 class Parser:
@@ -50,32 +91,52 @@ class Parser:
         return self.token_at()[1] if self.token_at() else None
     
 
-    def parse_add_expr(self):
+
+    def check_operation(self, operator, left, right):
         
+        match operator[1]:
+            case '+':
+                return PlusNode(left, right)
+            case '-':
+                return MinusNode(left, right)
+            case '*':
+                return MultiplicativeNode(left, right)
+            case '%':
+                return ModulusNode(left, right)
+            case '/':
+                return DivisionNode(left, right)
+            case '==':
+                return EqualsNode(left, right)
+            case '!=':
+                return NotEqualsNode(left, right)
+            
+
+    def parse_add_expr(self):
+
         left = self.parse_multi_expr()
 
         while (self.get_token_value() in ['+', '-']):
 
-            self.shift_token()
+            operator = self.shift_token()
 
             right = self.parse_multi_expr()
 
-            left = PlusNode(left, right)
+            left = self.check_operation(operator, left, right)
 
         return left
     
 
     def parse_multi_expr(self):
-
+        
         left = NumberNode(self.shift_token()[1])
 
         while (self.get_token_value() in ['*', '%', '/']):
 
-            self.shift_token()
+            operator = self.shift_token()
 
             right = NumberNode(self.shift_token()[1])
 
-            left = MultiplicativeNode(left, right)
+            left = self.check_operation(operator, left, right)
 
         return left
     
@@ -91,7 +152,50 @@ class Parser:
         self.shift_token()
 
         return PrintNode(expr)
+    
 
+    def check_bool_expr(self):
+
+        left = self.parse_statement()
+
+        while (self.get_token_value() in ['==', '!=']):
+            
+            operator = self.shift_token()
+
+            right = self.parse_statement()
+
+            left = self.check_operation(operator, left, right)
+
+        return left
+
+
+    def handle_paren(self):
+
+        left = self.parse_paren_expr()
+
+        while self.get_token_value() in ['*', '+']:
+
+            operator = self.shift_token()
+
+            right = self.parse_statement()
+
+            left = self.check_operation(operator, left, right)
+
+        return left
+
+    
+    def parse_paren_expr(self):
+
+        self.shift_token()
+        expr = None
+
+        while self.get_token_value() != ')':
+
+            expr = self.parse_statement()
+
+        self.shift_token()
+
+        return ParenNode(expr)
 
     def parse_statement(self):
 
@@ -102,6 +206,9 @@ class Parser:
                 return self.parse_add_expr()
             case 'PRINT':
                 return self.parse_print_expr()
+            case 'OpenParen':
+                return self.handle_paren()
+
 
     def parse_program(self):
 
@@ -112,7 +219,7 @@ class Parser:
             self.token_indx = 0
 
             while self.token_at():
-                ast.append(self.parse_statement())
+                ast.append(self.check_bool_expr())
             self.stmt_indx += 1
 
         return ast
@@ -126,3 +233,4 @@ class Parser:
             raise Exception("Nao foi identificado paranteses em seu PRINT !")
         
         self.shift_token()
+

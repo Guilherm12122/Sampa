@@ -29,6 +29,18 @@ def tokenize(code_str: str):
                 tuples_stmt.append(("PLUS", "+"))
                 j += 1
 
+            elif c == '-':
+                tuples_stmt.append(("MINUS", "-"))
+                j += 1
+
+            elif c == '/':
+                tuples_stmt.append(("DIVISION", "/"))
+                j += 1
+
+            elif c == '%':
+                tuples_stmt.append(("MODULUS", "%"))
+                j += 1
+
             elif c == "(":
                 tuples_stmt.append(("OpenParen", "("))
                 j += 1
@@ -40,6 +52,14 @@ def tokenize(code_str: str):
             elif c == "*":
                 tuples_stmt.append(("MULTIPLICATION", "*"))
                 j += 1
+
+            elif stmt[j:j+2] == '==':
+                tuples_stmt.append(("EQUALS", "=="))
+                j += 2
+
+            elif stmt[j:j+2] == '!=':
+                tuples_stmt.append(("NOT_EQUALS", "!="))
+                j += 2
 
             elif stmt[j:j+7] == "MOSTRAR":
                 tuples_stmt.append(("PRINT", "MOSTRAR"))
@@ -53,4 +73,3 @@ def tokenize(code_str: str):
         i += 1
 
     return tokens
-
